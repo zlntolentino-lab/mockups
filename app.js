@@ -132,71 +132,13 @@ window.showToast = (msg) => {
 // --- Render Core ---
 function render() {
   const app = document.getElementById("app");
+  const pageContent = document.getElementById("page-content");
   
   const pending = state.requests.filter(r => r.status === "pending");
   const answered = state.requests.filter(r => r.status === "answered");
   const archived = state.requests.filter(r => r.status === "archived");
   
-  app.innerHTML = `
-    <!-- Top Nav -->
-    <div class="top-bar">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7FB89A, var(--teal) 70%); display: flex; align-items: center; justify-content: center;">
-          <i data-lucide="clipboard-list" color="#F2F0E9"></i>
-        </div>
-        <span style="font-size: 19px; font-weight: 600; color: #F5F4F0;">IT Installation Management</span>
-      </div>
-      <button style="width: 34px; height: 34px; border-radius: 50%; background: #5A5A69; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;">
-        <i data-lucide="user" color="#EDEDF2" width="17"></i>
-      </button>
-    </div>
-
-    <!-- Menus -->
-    <div class="nav-menu">
-      <div style="position:relative">
-        <button class="nav-item ${state.selected === 'dashboard' ? 'active' : ''}" onclick="goTo('dashboard')">
-          <i data-lucide="layout-dashboard" width="16"></i> Dashboard
-        </button>
-      </div>
-      <div style="position:relative">
-        <button class="nav-item ${['request','request-form','answered','archives','approval'].includes(state.selected) ? 'active' : ''}" onclick="toggleMenu('ops')">
-          <i data-lucide="clipboard-list" width="16"></i> OPS <i data-lucide="chevron-down" width="14"></i>
-        </button>
-        <div class="dropdown ${state.openMenu === 'ops' ? 'show' : ''}" style="flex-direction: column;">
-           <div style="color: var(--muted); font-size: 11.5px; font-weight: 500; margin-bottom: 10px; text-transform: uppercase;">IT Installation</div>
-           <div style="display: flex; gap: 22px;">
-             <div>
-               <div style="font-size: 11.5px; color: var(--muted); margin-bottom: 8px;"><i data-lucide="file-text" width="13"></i> FORMS</div>
-               <button onclick="goTo('request')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">Request</button>
-             </div>
-             <div>
-               <div style="font-size: 11.5px; color: var(--muted); margin-bottom: 8px;"><i data-lucide="folder-open" width="13"></i> RECORDS</div>
-               <button onclick="goTo('answered')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">Answered</button>
-               <button onclick="goTo('archives')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">Archives</button>
-             </div>
-             <div>
-               <div style="font-size: 11.5px; color: var(--muted); margin-bottom: 8px;"><i data-lucide="check-square" width="13"></i> ACTIONS</div>
-               <button onclick="goTo('approval')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">Approval</button>
-             </div>
-           </div>
-        </div>
-      </div>
-      <div style="position:relative">
-        <button class="nav-item ${['general','users'].includes(state.selected) ? 'active' : ''}" onclick="toggleMenu('settings')">
-          <i data-lucide="settings" width="16"></i> Settings <i data-lucide="chevron-down" width="14"></i>
-        </button>
-        <div class="dropdown ${state.openMenu === 'settings' ? 'show' : ''}">
-          <div>
-            <div style="font-size: 11.5px; color: var(--muted); margin-bottom: 8px;"><i data-lucide="settings" width="13"></i> WORKSPACE</div>
-            <button onclick="goTo('general')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">General</button>
-            <button onclick="goTo('users')" style="display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 7px 8px; font-size: 13.5px;">Users & roles</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Container -->
-    <div class="container">
+  pageContent.innerHTML = `
       ${!["request", "request-form", "approval", "answered"].includes(state.selected) ? `<h1 style="font-size: 26px; font-weight: 400; color: #6B6B76; margin: 0 0 18px 0;">${pageTitles[state.selected]}</h1>` : ''}
       
       ${state.selected === 'dashboard' ? renderDashboard(pending, answered, archived) : ''}
@@ -206,12 +148,16 @@ function render() {
       ${state.selected === 'answered' ? renderDataTable('IT Installation Answered', answered, ['id','equipment','department','submitted','requester','decision'], true, 'view') : ''}
       ${state.selected === 'archives' ? renderArchives(archived) : ''}
       ${state.selected === 'general' || state.selected === 'users' ? renderSettings() : ''}
-    </div>
-    
     ${state.modalEntry ? renderModal() : ''}
     ${state.toast ? `<div class="toast"><i data-lucide="check-circle-2" color="var(--teal)" width="15"></i> ${state.toast}</div>` : ''}
   `;
-  
+
+  document.getElementById("dashboard-nav").classList.toggle("active", state.selected === "dashboard");
+  document.getElementById("ops-nav").classList.toggle("active", ['request','request-form','answered','archives','approval'].includes(state.selected));
+  document.getElementById("settings-nav").classList.toggle("active", ['general','users'].includes(state.selected));
+  document.getElementById("ops-menu").classList.toggle("show", state.openMenu === "ops");
+  document.getElementById("settings-menu").classList.toggle("show", state.openMenu === "settings");
+
   lucide.createIcons();
 }
 
